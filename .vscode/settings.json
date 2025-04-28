@@ -1,5 +1,11 @@
 {
   "files.associations": {
-    "wiringx.h": "c"
+    "wiringx.h": "c",
+    "unistd.h": "c",
+    "stdlib.h": "c",
+    "stdio.h": "c",
+    "basic_config.h": "c",
+    "ultrasonic.h": "c",
+    "motors_config.h": "c"
   }
 }
