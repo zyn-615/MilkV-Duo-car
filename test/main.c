@@ -2,9 +2,89 @@
 #include <unistd.h>
 #include <wiringx.h>
 #include <stdlib.h>
-#include <iostream>
-#include "basic_config.h"
-#include "motors_config.h"
+#include <stdbool.h>
+#include <sys/time.h>
+
+#define PinParameter MotorPin* PinList, int motorNum
+
+#define TWD
+#ifdef TWD
+
+#define leftMotorPin PinList[0]
+#define rightMotorPin PinList[1]
+
+#endif
+
+const long PWMPeriod = 100000;
+const long PWMEmpty = 0;
+
+typedef struct {
+  const int* forward;
+  const int* backward;
+  const int* speed;
+} MotorPin;
+
+void setupMilkv(void) {
+  if (wiringXSetup("milkv_duo", NULL) == -1) {
+    fprintf(stderr, "wiringX setup failed\n");
+    wiringXGC();
+    exit(1);
+  }
+}
+
+void checkVaildGPIO(int pinId) {
+  if (wiringXValidGPIO(pinId) != 0) {
+    fprintf(stderr, "Invalid GPIO %d\n", pinId);
+    exit(1);
+  }
+}
+
+void openPWM(int pinId) {
+  printf("open pinId : %d\n", pinId);
+  wiringXPWMEnable(pinId, 1);
+}
+
+void closePWM(int pinId) {
+  // wiringXPWMEnable(pinId, 0);
+}
+
+void setGPIOOUTPUT(int pinId) {
+  pinMode(pinId, PINMODE_OUTPUT);
+  digitalWrite(pinId, LOW);
+}
+
+void setGPIOINPUT(int pinId) {
+  pinMode(pinId, PINMODE_INPUT);
+}
+
+void setPWMPeriod(int pinId, long period) {
+  printf("setPWM -> %d %d\n", pinId, period);
+  if (wiringXPWMSetPeriod(pinId, period) != 0) {
+    fprintf(stderr, "Pin %d does not support PWM\n", pinId);
+    exit(-1);
+  }
+
+  wiringXPWMSetPeriod(pinId, period);
+}
+
+void setPWMDuty(int pinId, long duty) {
+  printf("setDuty : %d %ld\n", pinId, duty);
+  wiringXPWMSetDuty(pinId, duty);
+}
+
+bool toNowTime(struct timeval* _time) {
+  if (gettimeofday(_time, NULL) == -1) {
+    perror("gettimeofday failed");
+    return false;
+  }
+  return true;
+}
+
+struct timeval getNowTime(void) {
+  struct timeval _nowTime;
+  toNowTime(&_nowTime);
+  return _nowTime;
+}
 
 MotorPin newMotorPin(int forwardId, int backwardId, int speedId) {
   int* fId = (int*) malloc(sizeof(int));
@@ -28,7 +108,6 @@ void deleteMotorPin(MotorPin* p) {
   free((void*)p->forward);
   free((void*)p->backward);
   free((void*)p->speed);
-  // free((void*) p);
 }
 
 void deleteAllPointer(PinParameter) {
@@ -46,8 +125,8 @@ MotorPin* initializeMotorPins(int motorNum) {
   }
 
   MotorPin* MotorPinList = (MotorPin*) malloc(sizeof(MotorPin) * motorNum);
-  MotorPinList[0] = newMotorPin(4, 6, 5);
-  MotorPinList[1] = newMotorPin(7, 9, 12);
+  MotorPinList[1] = newMotorPin(3, 4, 2);
+  MotorPinList[0] = newMotorPin(5, 6, 7);
 
   if (motorNum == 4) {
     // MotorPinList[2] = newMotorPin(9, 10);
@@ -93,6 +172,12 @@ void setPinSpeed(int pinId, int duty) {
 void setForwardFullSpeed(PinParameter) {
   for (int i = 0; i < motorNum; ++i) {
     setPinSpeed(*PinList[i].speed, PWMPeriod);
+  }
+}
+
+void setForwardLowSpeed(PinParameter) {
+  for (int i = 0; i < motorNum; ++i) {
+    setPinSpeed(*PinList[i].speed, 1);
   }
 }
 
@@ -143,15 +228,19 @@ void stopAllMotors(PinParameter) {
 }
 
 void moveAction(PinParameter) {
-  int testCase = 5;
+  int testCase = 1;
   while (testCase--) {
     printf("test forward\n");
     setAllForward(PinList, motorNum);
+    printf("test finished\n");
+    fflush(stdout);
 
     sleep(5);
 
     printf("test backward\n");
     setAllBackward(PinList, motorNum);
+    printf("test finished\n");
+    fflush(stdout);
 
     sleep(5);
   }
@@ -160,13 +249,34 @@ void moveAction(PinParameter) {
 }
 
 void turnLeft(PinParameter) {
-  std::cerr << "turnLeft" << std::endl;
+  // std::cerr << "turnLeft" << std::endl;
   setMotorStop(&leftMotorPin);
   setForward(&rightMotorPin);
 }
 
 void turnRight(PinParameter) {
-  std::cerr << "turnRight" << std::endl;
+  // std::cerr << "turnRight" << std::endl;
   setMotorStop(&rightMotorPin);
   setForward(&leftMotorPin);
+}
+
+int main(void) {
+  setupMilkv();
+  const int MODE = 2;
+
+  printf("Platform: %s\n", wiringXPlatform());
+
+  MotorPin* MotorPinList = initializeMotorPins(MODE);
+  testGPIO(MotorPinList, MODE);
+  initMotors(MotorPinList, MODE);
+  setForwardLowSpeed(MotorPinList, MODE);
+
+  stopAllMotors(MotorPinList, MODE);
+  sleep(1);
+  moveAction(MotorPinList, MODE);
+
+  closeMotor(MotorPinList, MODE);
+  deleteAllPointer(MotorPinList, MODE);
+  wiringXGC();
+  return 0;
 }
