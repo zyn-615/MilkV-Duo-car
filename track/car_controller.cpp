@@ -15,30 +15,36 @@ namespace MotorControl {
   template <MotorType T>
   template <typename... Motor>
   CarController <T>::CarController(Motor... motor) {
-      (motors_.emplace_back(std::make_shared <T>(motor)), ...);
-  }
+      (motors_.emplace_back(std::make_shared <T> (motor)), ...);
+      checkValid();
+    }
 
   template <MotorType T>
   CarController <T>::CarController(std::span <T> motors) {
-    motors_.reserve(motors.size());
     for (const auto& motor : motors) {
       motors_.emplace_back(std::make_shared <T> (motor));
     }
+    checkValid();
   }
 
   template <MotorType T>
   CarController <T>::CarController(std::span <std::shared_ptr <T>> motors) {
-    motors_.reserve(motors.size());
-    std::copy(motors.begin(), motors.end(), motors.begin());
+    std::copy(motors.begin(), motors.end(), motors_.end());
+    checkValid();
+  }
+
+  template <MotorType T>
+  void CarController <T>::checkValid() {
+    if (motors_.size() != 2 && motors_.size() != 4) {
+      throw std::runtime_error("invalid motor number");
+    } else {
+      std::cout << "valid motor number" << std::endl;
+    }
   }
 
   template <MotorType T>
   void CarController <T>::move(Direction dir, Duration duration = Duration(1), PWMValue speed = PWM_PERIOD * 0.75) {
     auto initializeSpeed = [this, speed]() noexcept -> void {
-      if (motors_.size() != 2 && motors_.size() != 4) {
-        throw std::runtime_error("invalid motor number");
-      }
-
       for (const auto& motor : motors_) {
         motor->setSpeed(speed);
       }
@@ -101,6 +107,12 @@ namespace MotorControl {
   template <MotorType T>
   void CarController <T>::turnRight(Duration duration = Duration(1), PWMValue speed = PWM_PERIOD * 0.75) {
     move(Direction::Right, duration, speed);
+  }
+
+  template <MotorType T>
+  void CarController <T>::setMotorSpeeds(PWMValue leftSpeed, PWMValue rightSpeed) {
+    motors_[MotorNameTWD::Left]->setSpeed(leftSpeed);
+    motors_[MotorNameTWD::Right]->setSpeed(rightSpeed);
   }
 
   template <MotorType T>
