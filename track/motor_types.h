@@ -70,6 +70,7 @@ namespace MotorControl {
     public:
       void setOUTPUT();
       void setINPUT();
+      int getInputDigital();
       void setHIGH();
       void setLOW();
       void initialize() override;

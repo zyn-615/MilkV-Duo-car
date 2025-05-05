@@ -37,6 +37,10 @@ namespace MotorControl {
     pinMode(pinId_, PINMODE_INPUT);
   }
 
+  int GPIOPin::getInputDigital() {
+    return digitalRead(pinId_);
+  }
+
   void GPIOPin::setHIGH() {
     digitalWrite(pinId_, HIGH);
   }
