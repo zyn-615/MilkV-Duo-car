@@ -28,8 +28,7 @@ namespace MotorControl {
   }
 
   template <MotorType T>
-  CarController <T>::CarController(std::span <std::shared_ptr <T>> motors) {
-    std::copy(motors.begin(), motors.end(), motors_.end());
+  CarController <T>::CarController(std::span <std::shared_ptr <T>> motors) : motors_(motors.begin(), motors.end()) {
     checkValid();
   }
 
