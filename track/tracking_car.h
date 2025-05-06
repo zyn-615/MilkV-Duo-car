@@ -44,7 +44,7 @@ namespace Tracking {
 
       double calcNewSpeed() {
         double factor = 1.0 - (curvature_ * reduction_);
-        factor = std::clamp(factor, 0.3, 1);
+        factor = std::clamp(factor, 0.3, 1.0);
         return minSpeed_ + (baseSpeed_ - minSpeed_) * factor;
       }
 

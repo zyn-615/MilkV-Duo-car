@@ -54,6 +54,7 @@ namespace MotorControl {
 
     public:
       Pin(PinId pinId, PinType pinType);
+      Pin() {}
       virtual ~Pin() = default;
 
       int checkValid();
@@ -75,6 +76,7 @@ namespace MotorControl {
       void setLOW();
       void initialize() override;
       GPIOPin(PinId pinId, PinType pinType, GPIOType GPIOType_, const std::string name);
+      GPIOPin() {}
   };
 
   class PWMPin : public Pin {
@@ -91,7 +93,8 @@ namespace MotorControl {
       void closePWM();
       void setDuty(PWMValue duty);
       void initialize() override;
-      PWMPin(PinId pinId, PinType pinType, PWMValue period, PWMValue duty = 0, const std::string name);
+      PWMPin() {}
+      PWMPin(PinId pinId, PinType pinType, PWMValue period, PWMValue duty, const std::string name);
       ~PWMPin();
   };
 
@@ -102,7 +105,7 @@ namespace MotorControl {
       PWMPin speed_;
 
     public:
-      MotorPins();
+      MotorPins() {}
       MotorPins(PinId forwardPinId, PinId backwardPinId, PinId speedPinId, std::string name);
       virtual ~MotorPins() = default;
   };
