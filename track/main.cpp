@@ -5,6 +5,7 @@
 #include "motor_types.h"
 #include "dc_motor.h"
 #include <thread>
+#include <unistd.h>
 
 int main() {
   try {
@@ -16,7 +17,12 @@ int main() {
       auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (*leftMotor, *rightMotor);
 
       car->forward();
-
+      sleep(1);
+      car->turnLeft();
+      sleep(1);
+      car->backward();
+      sleep(1);
+      car->turnRight();
       
   } catch (const std::exception& e) {
       std::cerr << "Error: " << e.what() << std::endl;

@@ -85,28 +85,28 @@ namespace MotorControl {
       switch (dir) {
         case Direction::Forward:
           std::cout << "car is moving forward" << std::endl;
-          motors_[MotorNameTWD::Left]->moveForward();
-          motors_[MotorNameTWD::Right]->moveForward();
+          motors_[static_cast<std::size_t>(MotorNameTWD::Left)]->forward();
+          motors_[static_cast<std::size_t>(MotorNameTWD::Right)]->forward();
           break;
         case Direction::Backward:
           std::cout << "car is moving backward" << std::endl;
-          motors_[MotorNameTWD::Left]->moveBackward();
-          motors_[MotorNameTWD::Right]->moveBackward();
+          motors_[static_cast<std::size_t>(MotorNameTWD::Left)]->backward();
+          motors_[static_cast<std::size_t>(MotorNameTWD::Right)]->backward();
           break;
         case Direction::Left:
           std::cout << "car is turning left" << std::endl;
-          motors_[MotorNameTWD::Left]->stop();
-          motors_[MotorNameTWD::Right]->moveForward();
+          motors_[static_cast<std::size_t>(MotorNameTWD::Left)]->backward();
+          motors_[static_cast<std::size_t>(MotorNameTWD::Right)]->forward();
           break;
         case Direction::Right:
           std::cout << "car is turning right" << std::endl;
-          motors_[MotorNameTWD::Left]->moveForward();
-          motors_[MotorNameTWD::Right]->stop();
+          motors_[static_cast<std::size_t>(MotorNameTWD::Left)]->forward();
+          motors_[static_cast<std::size_t>(MotorNameTWD::Right)]->backward();
           break;
         case Direction::Stop:
           std::cout << "car is stop" << std::endl;
-          motors_[MotorNameTWD::Left]->stop();
-          motors_[MotorNameTWD::Right]->stop();
+          motors_[static_cast<std::size_t>(MotorNameTWD::Left)]->stop();
+          motors_[static_cast<std::size_t>(MotorNameTWD::Right)]->stop();
           break;
       }
     };
@@ -125,22 +125,22 @@ namespace MotorControl {
 
   template <MotorType T>
   void CarController <T>::forwardWithSpeed(Duration duration, PWMValue speed) {
-    move(Direction::Forward, duration, speed);
+    move(Direction::Forward, duration, speed, true);
   }
 
   template <MotorType T>
   void CarController <T>::backwardWithSpeed(Duration duration, PWMValue speed) {
-    move(Direction::Backward, duration, speed);
+    move(Direction::Backward, duration, speed, true);
   }
 
   template <MotorType T>
   void CarController <T>::turnLeftWithSpeed(Duration duration, PWMValue speed) {
-    move(Direction::Left, duration, speed);
+    move(Direction::Left, duration, speed, true);
   }
 
   template <MotorType T>
   void CarController <T>::turnRightWithSpeed(Duration duration, PWMValue speed) {
-    move(Direction::Right, duration, speed);
+    move(Direction::Right, duration, speed, true);
   }
 
   template <MotorType T>
@@ -165,8 +165,10 @@ namespace MotorControl {
 
   template <MotorType T>
   void CarController <T>::setMotorSpeeds(PWMValue leftSpeed, PWMValue rightSpeed) {
-    motors_[MotorNameTWD::Left]->setSpeed(leftSpeed);
-    motors_[MotorNameTWD::Right]->setSpeed(rightSpeed);
+    motors_[static_cast<std::size_t>(MotorNameTWD::Left)]->setSpeed(leftSpeed);
+    motors_[static_cast<std::size_t>(MotorNameTWD::Right)]->setSpeed(rightSpeed);
+    motors_[static_cast<std::size_t>(MotorNameTWD::Left)]->moveForward();
+
   }
 
   template <MotorType T>
