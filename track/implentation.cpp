@@ -97,6 +97,7 @@ namespace MotorControl {
 
   void PWMPin::setDuty(PWMValue duty) {
     duty_ = duty;
+    wiringXPWMSetDuty(pinId_, duty_);
   }
 
   void PWMPin::initialize() {

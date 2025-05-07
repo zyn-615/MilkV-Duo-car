@@ -22,9 +22,9 @@ int main() {
       auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (Motors);
       // auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (leftMotor, rightMotor);
 
-      car->forward();
+      car->forwardWithSpeed(std::chrono::seconds(0), MotorControl::PWM_PERIOD * 0.25);
       sleep(1);
-      car->turnLeft();
+      car->turnLeftWithSpeed(std::chrono::seconds(0), MotorControl::PWM_PERIOD);
       sleep(1);
       car->backward();
       sleep(1);
