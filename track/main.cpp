@@ -10,11 +10,11 @@
 int main() {
   try {
       PlatformGuard platform;
+      std::cerr << "IJJI" << std::endl;
+      auto leftMotor = MotorControl::DCMotor (0, 1, 2, "leftMotor");
+      auto rightMotor = MotorControl::DCMotor (3, 4, 5, "rightMotor");
 
-      auto leftMotor = std::make_shared <MotorControl::DCMotor> (0, 1, 2, "leftMotor");
-      auto rightMotor = std::make_shared <MotorControl::DCMotor> (3, 4, 5, "rightMotor");
-
-      auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (*leftMotor, *rightMotor);
+      auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (leftMotor, rightMotor);
 
       car->forward();
       sleep(1);

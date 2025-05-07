@@ -49,6 +49,11 @@ namespace MotorControl {
     digitalWrite(pinId_, LOW);
   }
 
+  GPIOPin::~GPIOPin() {
+    setLOW();
+    std::cout << "GPIOPin : " << pinId_ << " closed" << std::endl; 
+  }
+
   void GPIOPin::initialize() {
     if (checkValid() != 0) {
       throw std::runtime_error("Invalid GPIO pinId : " + std::to_string(pinId_) + " for " + name_);
@@ -118,8 +123,7 @@ namespace MotorControl {
     backward_(backwardPinId, PinType::GPIO, GPIOType::OUTPUT, name + "-backward"),
     speed_(speedPinId, PinType::PWM, PWM_PERIOD, PWM_EMPTY, name + "-speed") {}
   
-  DCMotor::DCMotor(PinId forward, PinId backward, PinId speed, const std::string name) : name_(std::move(name)) {
-    MotorPins(forward, backward, speed, name_);
+  DCMotor::DCMotor(PinId forward, PinId backward, PinId speed, const std::string name) : name_(name), MotorPins(forward, backward, speed, name) {
     std::cout << "DCMotor " << name_ << " initialized" << std::endl;
   }
 

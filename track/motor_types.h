@@ -77,6 +77,7 @@ namespace MotorControl {
       void initialize() override;
       GPIOPin(PinId pinId, PinType pinType, GPIOType GPIOType_, const std::string name);
       GPIOPin() {}
+      ~GPIOPin();
   };
 
   class PWMPin : public Pin {
