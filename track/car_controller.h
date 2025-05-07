@@ -23,8 +23,8 @@ namespace MotorControl {
       std::vector <std::shared_ptr <T>> motors_;
     
     public:
-      template <typename... Motor>
-      CarController(Motor... motor);
+      // template <typename... Motor>
+      // CarController(Motor... motor);
       CarController(std::span <T> motors);
       CarController(std::span <std::shared_ptr <T>> motors);
       CarController() {}
@@ -44,12 +44,12 @@ namespace MotorControl {
 }
 
 namespace MotorControl {
-  template <MotorType T>
-  template <typename... Motor>
-  CarController <T>::CarController(Motor... motor) {
-      (motors_.emplace_back(std::make_shared <T> (motor)), ...);
-      checkValid();
-    }
+  // template <MotorType T>
+  // template <typename... Motor>
+  // CarController <T>::CarController(Motor... motor) {
+  //     (motors_.emplace_back(std::make_shared <T> (motor)), ...);
+  //     checkValid();
+  //   }
 
   template <MotorType T>
   CarController <T>::CarController(std::span <T> motors) {

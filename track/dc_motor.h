@@ -17,6 +17,7 @@ namespace MotorControl {
 
     public:
       DCMotor(PinId forward, PinId backward, PinId speed, const std::string name);
+      DCMotor() {}
       ~DCMotor();
       void forward() override;
       void backward() override;

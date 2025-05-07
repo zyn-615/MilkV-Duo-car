@@ -10,11 +10,17 @@
 int main() {
   try {
       PlatformGuard platform;
+      int pwmIdLeft = 0;
+      int pwmIdRight = 0;
+      std::cout << "input pwmleft and pwm right" << std::endl;
+      std::cin >> pwmIdLeft >> pwmIdRight;
       std::cerr << "IJJI" << std::endl;
-      auto leftMotor = MotorControl::DCMotor (0, 1, 2, "leftMotor");
-      auto rightMotor = MotorControl::DCMotor (3, 4, 5, "rightMotor");
+      auto leftMotor = std::make_shared <MotorControl::DCMotor> (0, 1, pwmIdLeft, "leftMotor");
+      auto rightMotor = std::make_shared <MotorControl::DCMotor> (6, 7, pwmIdRight, "rightMotor");
+      std::vector <std::shared_ptr <MotorControl::DCMotor>> Motors = {leftMotor, rightMotor};
 
-      auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (leftMotor, rightMotor);
+      auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (Motors);
+      // auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (leftMotor, rightMotor);
 
       car->forward();
       sleep(1);
