@@ -20,16 +20,17 @@ namespace Tracking {
       virtual double getValue() const = 0;
       virtual double getPositon() const = 0;
   };
-
+  
+  template <typename SensorT> requires std::derived_from<SensorT, ISensor>
   class PIDTrackingControl : public ITrackingControl {
     private:
       std::string name_;
-      std::shared_ptr <SensorArray <ISensor>> sensors_;
-      std::unique_ptr <PIDController> PIDController_;
+      std::shared_ptr <SensorArray <SensorT>> sensors_;
+      std::shared_ptr <PIDController> PIDController_;
       double positon_{0.0};
       double value_{0.0};
 
-      double processData(const std::vector <std::unique_ptr <ISensorState>>& state) {
+      double processData(const std::vector <std::shared_ptr <ISensorState>>& state) {
         if (state.empty()) return 0.0;
 
         const int sensorNum = state.size();
@@ -54,8 +55,8 @@ namespace Tracking {
       }
     
     public:
-      PIDTrackingControl(std::string name, std::shared_ptr <SensorArray <ISensor>> sensors, std::unique_ptr <PIDController> _PIDController)
-      : name_(std::move(name)), sensors_(std::move(sensors)), PIDController_(std::move(_PIDController)) {
+      PIDTrackingControl(std::string name, std::shared_ptr <SensorArray <SensorT>> sensors, std::shared_ptr <PIDController> _PIDController)
+      : name_(name), sensors_(sensors), PIDController_(_PIDController) {
         PIDController_->setSetpoint(0.0);
       }
 

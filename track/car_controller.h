@@ -167,8 +167,6 @@ namespace MotorControl {
   void CarController <T>::setMotorSpeeds(PWMValue leftSpeed, PWMValue rightSpeed) {
     motors_[static_cast<std::size_t>(MotorNameTWD::Left)]->setSpeed(leftSpeed);
     motors_[static_cast<std::size_t>(MotorNameTWD::Right)]->setSpeed(rightSpeed);
-    motors_[static_cast<std::size_t>(MotorNameTWD::Left)]->moveForward();
-
   }
 
   template <MotorType T>

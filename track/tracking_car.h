@@ -149,7 +149,7 @@ namespace Tracking {
         if (value > 0) { // 向右转
           if (abs_value > 0.3) { // 只有在足够大的修正值时才使用反向转向
             // 右轮反转
-            carController_->turnRight(std::chrono::seconds(0), motor_speed);
+            carController_->turnRightWithSpeed(std::chrono::seconds(0), motor_speed);
             std::cout << "Counter Right Turn - Full Speed: " << motor_speed << std::endl;
           } else {
             // 小修正使用差速
@@ -158,7 +158,7 @@ namespace Tracking {
         } else { // 向左转
           if (abs_value > 0.3) { // 只有在足够大的修正值时才使用反向转向
             // 左轮反转
-            carController_->turnLeft(std::chrono::seconds(0), motor_speed);
+            carController_->turnLeftWithSpeed(std::chrono::seconds(0), motor_speed);
             std::cout << "Counter Left Turn - Full Speed: " << motor_speed << std::endl;
           } else {
             // 小修正使用差速
@@ -192,10 +192,11 @@ namespace Tracking {
     
     public:
       TrackingCar(
-        std::shared_ptr <MotorControl::CarController <MotorType>> carController, std::shared_ptr<TrackingType> track,
-        double baseSpeed = MotorControl::PWM_PERIOD * 0.9, double turningSpeed = MotorControl::PWM_PERIOD, double minSpeed = MotorControl::PWM_PERIOD * 0.65, double maxValue = 1.0,
+        std::shared_ptr <MotorControl::CarController <MotorType>> carController, std::shared_ptr <TrackingType> track,
+        double baseSpeed = MotorControl::PWM_PERIOD * 0.5, double turningSpeed = MotorControl::PWM_PERIOD, 
+        double minSpeed = MotorControl::PWM_PERIOD * 0.65, double maxValue = 1.0,
         SteeringMode steeringMode = SteeringMode::Dynamic) 
-        : carController_(std::move(carController)), track_(std::move(track)), baseSpeed_(baseSpeed), turningSpeed_(turningSpeed),
+        : carController_(carController), track_(track), baseSpeed_(baseSpeed), turningSpeed_(turningSpeed),
         minSpeed_(minSpeed), maxValue_(maxValue), steeringMode_(steeringMode) {}
       
       void start() {
@@ -224,25 +225,25 @@ namespace Tracking {
         curvature_ = nowVector * coefficient;
         lastPositon_ = curPostion;
 
-        double updateSpeed = calcNewSpeed();
+        // double updateSpeed = calcNewSpeed();
         switch (steeringMode_) {
           case SteeringMode::Diff:
-            applyDiff(curValue, updateSpeed);
+            applyDiff(curValue);
             break;
           case SteeringMode::HigherDiff:
-            applyHigherDiff(curValue, updateSpeed);
+            applyHigherDiff(curValue);
             break;
           case SteeringMode::Counter:
-            applyCounter(curValue, updateSpeed);
+            applyCounter(curValue);
             break;
           case SteeringMode::Dynamic:
-            applyDynamic(curValue, updateSpeed, curPostion);
+            applyDynamic(curValue, curPostion);
             break;
         }
         
         std::cout << std::fixed << std::setprecision(4);
         std::cout << "pos : " << curPostion << "  value : " << curValue << std::endl;
-        std::cout << "curvatrue :  " << curvature_ << "   speed :  " << updateSpeed << std::endl;  
+        std::cout << "curvatrue :  " << curvature_ << "   speed : nn " << std::endl;  
         std::cout << std::defaultfloat; 
       }
   };

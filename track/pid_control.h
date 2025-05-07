@@ -42,8 +42,10 @@ namespace Tracking {
 
   struct PIDParams {
     Vector <double> pid{Vector <double> (0, 0, 0)};
-    double maxLimit{std::numeric_limits <double>::infinity()};
-    double minLimit{-std::numeric_limits <double>::infinity()};
+    // double maxLimit{std::numeric_limits <double>::infinity()};
+    // double minLimit{-std::numeric_limits <double>::infinity()};
+    double maxLimit{1.0};
+    double minLimit{-1.0};
     PIDParams() {}
     PIDParams(Vector <double> vec) : pid(vec) {}
   };

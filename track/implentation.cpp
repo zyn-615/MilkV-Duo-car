@@ -50,7 +50,10 @@ namespace MotorControl {
   }
 
   GPIOPin::~GPIOPin() {
-    setLOW();
+    if (GPIOType_ == GPIOType::OUTPUT) {
+      setLOW();
+    }
+    
     std::cout << "GPIOPin : " << pinId_ << " closed" << std::endl; 
   }
 

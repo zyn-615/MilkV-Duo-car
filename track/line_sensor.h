@@ -32,7 +32,7 @@ namespace Tracking {
   class ISensor {
     public:
       virtual ~ISensor() = default;
-      virtual std::unique_ptr <ISensorState> getNowState() = 0;
+      virtual std::shared_ptr <ISensorState> getNowState() = 0;
       virtual std::string getName() const = 0;
   };
 
@@ -42,13 +42,13 @@ namespace Tracking {
       MotorControl::GPIOPin pin_;
 
     public:
-      DigitalSensor(std::string name, MotorControl::GPIOPin pin) : name_(std::move(name)), pin_(pin) {
-        pin_.setINPUT();
+      DigitalSensor(std::string name, MotorControl::PinId pinId) : name_(name), 
+      pin_(pinId, MotorControl::PinType::GPIO, MotorControl::GPIOType::INPUT, name) {
       }
 
-      std::unique_ptr <ISensorState> getNowState() override {
+      std::shared_ptr <ISensorState> getNowState() override {
         bool nowState = pin_.getInputDigital() == HIGH;
-        return std::make_unique <DigitalSensorState> (nowState);
+        return std::make_shared <DigitalSensorState> (nowState);
       }
 
       std::string getName() const override {
@@ -65,21 +65,24 @@ namespace Tracking {
       std::vector <std::shared_ptr <T>> sensors_;
     
     public:
-      SensorArray(std::vector <std::shared_ptr <T>> sensors) : sensors_(std::move(sensors)) {}
+      // SensorArray(std::vector <std::shared_ptr <T>> sensors) : sensors_(std::move(sensors)) {}
 
-      template <typename... Sensors>
-      SensorArray(Sensors... sensor) {
-        (sensors_.emplace_back(sensor), ...);
-      }
+      // template <typename... Sensors>
+      // SensorArray(Sensors... sensor) {
+      //   (sensors_.emplace_back(sensor), ...);
+      // }
 
-      SensorArray(std::span <T> sensors) {
-        for (const auto& sensor : sensors) {
-          sensors_.emplace_back(std::make_shared <T> (sensor));
-        }
-      }
+      // SensorArray(std::span <T> sensors) {
+      //   for (const auto& sensor : sensors) {
+      //     sensors_.emplace_back(std::make_shared <T> (sensor));
+      //   }
+      // }
 
-      std::vector <std::unique_ptr <ISensorState>> getAllState() const {
-        std::vector <std::unique_ptr <ISensorState>> state;
+      template <typename U> requires std::derived_from<U, T>
+      SensorArray(std::span <std::shared_ptr <U>> sensors) : sensors_(sensors.begin(), sensors.end()) {}
+
+      std::vector <std::shared_ptr <ISensorState>> getAllState() const {
+        std::vector <std::shared_ptr <ISensorState>> state;
         state.reserve(sensors_.size());
 
         for (const auto& sensor : sensors_) {

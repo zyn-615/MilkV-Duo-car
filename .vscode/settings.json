@@ -57,6 +57,7 @@
     "concepts": "cpp",
     "numbers": "cpp",
     "span": "cpp",
-    "iomanip": "cpp"
+    "iomanip": "cpp",
+    "thread": "cpp"
   }
 }

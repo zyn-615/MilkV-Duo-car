@@ -10,20 +10,53 @@
 int main() {
   try {
       PlatformGuard platform;
-      int pwmIdLeft = 0;
-      int pwmIdRight = 0;
-      double sp = 2.0;
+      int pwmIdLeft = 2;
+      int pwmIdRight = 9;
+      // double sp = 2.0;
       std::cout << "input pwmleft and pwm right" << std::endl;
-      std::cin >> pwmIdLeft >> pwmIdRight;
+      // std::cin >> pwmIdLeft >> pwmIdRight;
       std::cerr << "IJJI" << std::endl;
       std::cout << "input speed" << std::endl;
-      std::cin >> sp;
+      // std::cin >> sp;
 
       auto leftMotor = std::make_shared <MotorControl::DCMotor> (0, 1, pwmIdLeft, "leftMotor");
       auto rightMotor = std::make_shared <MotorControl::DCMotor> (6, 7, pwmIdRight, "rightMotor");
       std::vector <std::shared_ptr <MotorControl::DCMotor>> Motors = {leftMotor, rightMotor};
 
       auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (Motors);
+      
+      Tracking::PIDParams pid(Tracking::Vector <double> (5.5, 0.01, 0.5));
+      auto pidCon = std::make_shared <Tracking::PIDController> (pid);
+      
+      constexpr int sensorNum = 8;
+      std::array <std::shared_ptr <Tracking::DigitalSensor>, sensorNum> sensors;
+
+      MotorControl::PinId mapId[] = {26, 22, 21, 20, 19, 18, 17, 16};
+
+      for (int i = 0; i < sensorNum; ++i) {
+        sensors[i] = std::make_shared <Tracking::DigitalSensor> (std::to_string(i + 1) + " sensor", mapId[i]);
+      }
+
+      std::span <std::shared_ptr <Tracking::DigitalSensor>> sensorSpan(sensors);
+
+      auto sensorsArray = std::make_shared <Tracking::SensorArray <Tracking::DigitalSensor>> (sensorSpan);
+      auto pidTracking = std::make_shared <Tracking::PIDTrackingControl <Tracking::DigitalSensor>> ("pidTrackingControl", sensorsArray, pidCon);
+
+      auto trackingCar = std::make_shared <Tracking::TrackingCar <MotorControl::DCMotor, Tracking::PIDTrackingControl <Tracking::DigitalSensor>>> 
+      (car, pidTracking, MotorControl::PWM_PERIOD * 0.7, MotorControl::PWM_PERIOD * 0.8, MotorControl::PWM_PERIOD * 0.65, 1.0);
+
+      trackingCar->start();
+      int testCase = 1;
+      std::cout << "input testCase : " << std::endl;
+      std::cin >> testCase;
+
+      for (int t = 1; t <= testCase; ++t) {
+        trackingCar->update();
+        std::this_thread::sleep_for(std::chrono::milliseconds(450));
+      }
+
+      trackingCar->end();
+
       // auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (leftMotor, rightMotor);
 
       // car->forwardWithSpeed(std::chrono::seconds(0), MotorControl::PWM_PERIOD * sp);
