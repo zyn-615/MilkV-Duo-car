@@ -39,7 +39,7 @@ namespace Tracking {
       double turningSpeed_;
       double lastPositon_{0.0};
       double curvature_{0.0};
-      double reduction_{0.1};
+      double reduction_{0.8};
       Vector <double> coefficient{0.7, 0.3};
       bool isStarted_{false};
       SteeringMode steeringMode_;
@@ -111,7 +111,7 @@ namespace Tracking {
           carController_->setMotorSpeeds(leftSpeed, rightSpeed);
           carController_->forward(std::chrono::seconds(0));
           
-          std::cout << "Rotational Left: " << leftSpeed << ", Right: " << rightSpeed << std::endl;
+          std::cout << "Higher MODE Left: " << leftSpeed << ", Right: " << rightSpeed << std::endl;
         } else { 
           double leftSpeed = minSpeed_ * (1.0 - abs_value);
           double rightSpeed = turningSpeed_;
@@ -121,7 +121,7 @@ namespace Tracking {
           
           carController_->setMotorSpeeds(leftSpeed, rightSpeed);
           carController_->forward(std::chrono::seconds(0));
-          std::cout << "Rotational left: " << leftSpeed << ", Right: " << rightSpeed << std::endl;
+          std::cout << "Higher MODE left: " << leftSpeed << ", Right: " << rightSpeed << std::endl;
         }
 
         std::cout << std::defaultfloat;
@@ -139,21 +139,21 @@ namespace Tracking {
         if (value > 0) {
           if (abs_value > 0.3) { 
             carController_->turnRightWithSpeed(std::chrono::seconds(0), motor_speed);
-            std::cout << "Counter Right Turn Full Speed: " << motor_speed << std::endl;
+            std::cout << "Counter MODE Right Turn Full Speed: " << motor_speed << std::endl;
           } else {
             applyHigherDiff(value);
           }
         } else {
           if (abs_value > 0.3) { 
             carController_->turnLeftWithSpeed(std::chrono::seconds(0), motor_speed);
-            std::cout << "Counter Left Turn Full Speed: " << motor_speed << std::endl;
+            std::cout << "Counter MODE Left Turn Full Speed: " << motor_speed << std::endl;
           } else {
             applyHigherDiff(value);
           }
         }
         
         // std::cout << std::fixed << std::setprecision(4);
-        // std::cout << "Counter - Left: " << leftSpeed << ", Right: " << rightSpeed << std::endl;
+        // std::cout << "Counter Left: " << leftSpeed << ", Right: " << rightSpeed << std::endl;
         // std::cout << std::defaultfloat;
       }
 
@@ -161,13 +161,13 @@ namespace Tracking {
         double absValue = std::abs(value);
         
          if (absValue > 0.6 || curvature_ > 0.15) {
-          std::cout << "Dynamic Using Counter Steering for sharp turn" << std::endl;
+          std::cout << "Dynamic MODE Using Counter Steering for sharp turn" << std::endl;
           applyCounter(value);
         } else if (absValue > 0.3 || curvature_ > 0.05) {
-          std::cout << "Dynamic Using Higher Diff for medium turn" << std::endl;
+          std::cout << "Dynamic MODE Using Higher Diff for medium turn" << std::endl;
           applyHigherDiff(value);
         } else {
-          std::cout << "Dynamic Using Diff for slight value" << std::endl;
+          std::cout << "Dynamic MODE Using Diff for slight value" << std::endl;
           applyDiff(value);
         }
       }

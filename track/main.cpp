@@ -27,13 +27,17 @@ int main() {
       std::cin >> _Broken;
       Broken = _Broken > 0;
 
+      int seconds = 10;
+      std::cout << "second : " << std::endl;
+      std::cin >> seconds;
+
       auto leftMotor = std::make_shared <MotorControl::DCMotor> (0, 1, pwmIdLeft, "leftMotor");
       auto rightMotor = std::make_shared <MotorControl::DCMotor> (6, 7, pwmIdRight, "rightMotor");
       std::vector <std::shared_ptr <MotorControl::DCMotor>> Motors = {leftMotor, rightMotor};
 
       auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (Motors);
       
-      Tracking::PIDParams pid(Tracking::Vector <double> (50, 0.01, 0.5));
+      Tracking::PIDParams pid(Tracking::Vector <double> (10, 0.01, 0.5));
       auto pidCon = std::make_shared <Tracking::PIDController> (pid);
       
       constexpr int sensorNum = 8;
@@ -60,7 +64,7 @@ int main() {
 
       for (int t = 1; t <= testCase; ++t) {
         trackingCar->update();
-        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        std::this_thread::sleep_for(std::chrono::milliseconds(seconds));
       }
 
       trackingCar->end();
