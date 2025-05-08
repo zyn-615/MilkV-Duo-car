@@ -111,7 +111,7 @@ namespace Tracking {
           carController_->setMotorSpeeds(leftSpeed, rightSpeed);
           carController_->forward(std::chrono::seconds(0));
           
-          std::cout << "Rotational - Left: " << leftSpeed << ", Right: " << rightSpeed << std::endl;
+          std::cout << "Rotational Left: " << leftSpeed << ", Right: " << rightSpeed << std::endl;
         } else { 
           double leftSpeed = minSpeed_ * (1.0 - abs_value);
           double rightSpeed = turningSpeed_;
@@ -121,7 +121,7 @@ namespace Tracking {
           
           carController_->setMotorSpeeds(leftSpeed, rightSpeed);
           carController_->forward(std::chrono::seconds(0));
-          std::cout << "Rotational - left: " << leftSpeed << ", Right: " << rightSpeed << std::endl;
+          std::cout << "Rotational left: " << leftSpeed << ", Right: " << rightSpeed << std::endl;
         }
 
         std::cout << std::defaultfloat;
@@ -139,14 +139,14 @@ namespace Tracking {
         if (value > 0) {
           if (abs_value > 0.3) { 
             carController_->turnRightWithSpeed(std::chrono::seconds(0), motor_speed);
-            std::cout << "Counter Right Turn - Full Speed: " << motor_speed << std::endl;
+            std::cout << "Counter Right Turn Full Speed: " << motor_speed << std::endl;
           } else {
             applyHigherDiff(value);
           }
         } else {
           if (abs_value > 0.3) { 
             carController_->turnLeftWithSpeed(std::chrono::seconds(0), motor_speed);
-            std::cout << "Counter Left Turn - Full Speed: " << motor_speed << std::endl;
+            std::cout << "Counter Left Turn Full Speed: " << motor_speed << std::endl;
           } else {
             applyHigherDiff(value);
           }
