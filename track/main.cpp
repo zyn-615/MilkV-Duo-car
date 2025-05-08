@@ -16,8 +16,16 @@ int main() {
       std::cout << "input pwmleft and pwm right" << std::endl;
       // std::cin >> pwmIdLeft >> pwmIdRight;
       std::cerr << "IJJI" << std::endl;
-      std::cout << "input speed" << std::endl;
+      std::cout << "input speed  base and turn" << std::endl;
       // std::cin >> sp;
+
+      double base = 1, turn = 3;
+      std::cin >> base >> turn;
+
+      int _Break = 0;
+      std::cout << "Break ?" << std::endl;
+      std::cin >> _Break;
+      Break = _Break > 0;
 
       auto leftMotor = std::make_shared <MotorControl::DCMotor> (0, 1, pwmIdLeft, "leftMotor");
       auto rightMotor = std::make_shared <MotorControl::DCMotor> (6, 7, pwmIdRight, "rightMotor");
@@ -25,7 +33,7 @@ int main() {
 
       auto car = std::make_shared <MotorControl::CarController <MotorControl::DCMotor>> (Motors);
       
-      Tracking::PIDParams pid(Tracking::Vector <double> (5.5, 0.01, 0.5));
+      Tracking::PIDParams pid(Tracking::Vector <double> (50, 0.01, 0.5));
       auto pidCon = std::make_shared <Tracking::PIDController> (pid);
       
       constexpr int sensorNum = 8;
@@ -43,16 +51,16 @@ int main() {
       auto pidTracking = std::make_shared <Tracking::PIDTrackingControl <Tracking::DigitalSensor>> ("pidTrackingControl", sensorsArray, pidCon);
 
       auto trackingCar = std::make_shared <Tracking::TrackingCar <MotorControl::DCMotor, Tracking::PIDTrackingControl <Tracking::DigitalSensor>>> 
-      (car, pidTracking, MotorControl::PWM_PERIOD * 0.7, MotorControl::PWM_PERIOD * 0.8, MotorControl::PWM_PERIOD * 0.65, 1.0);
+      (car, pidTracking, MotorControl::PWM_PERIOD * base, MotorControl::PWM_PERIOD * turn, MotorControl::PWM_PERIOD * 0.65, 1.0);
 
       trackingCar->start();
-      int testCase = 1;
+      int testCase = 2;
       std::cout << "input testCase : " << std::endl;
       std::cin >> testCase;
 
       for (int t = 1; t <= testCase; ++t) {
         trackingCar->update();
-        std::this_thread::sleep_for(std::chrono::milliseconds(450));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
       }
 
       trackingCar->end();

@@ -47,9 +47,22 @@ namespace Tracking {
       double speedMap(double preSpeed) {
         const double low = 0.2;
         if (preSpeed < low) return 0.0;
-        double map = (preSpeed - low) / (1.0 - low);//to [0,1]
-        double power = 1.5;
-        double mappedSpeed = 0.65 + 0.35 * std::pow(map, power);
+        
+        double map = (preSpeed - low) / (1.0 - low); // to [0,1]
+        
+        // 使用更积极的S形曲线
+        double power = 8; // 降低幂次，使曲线更平滑
+        double x = map;
+        double mappedSpeed;
+        
+        if (x < 0.5) {
+            // 前半段更快上升
+            mappedSpeed = 0.7 + 0.1 * std::pow(2 * x, power); // 提高最低速度到70%
+        } else {
+            // 后半段快速上升
+            mappedSpeed = 0.8 + 0.2 * std::pow(2 * (x - 0.5), power);
+        }
+        
         return mappedSpeed * MotorControl::PWM_PERIOD;
       }
 
@@ -67,8 +80,18 @@ namespace Tracking {
 
       void applyDiff(const double value) {
         double absValue = std::abs(value);
-
-        double turn_ratio = value * 2.0; // 放大修正值的影响
+        
+        // 非线性映射：小偏离时响应小，大偏离时响应大
+        double turn_ratio;
+        if (absValue < 0.3) {
+            // 小偏离时使用平方函数，减弱响应
+            turn_ratio = (value > 0 ? 1 : -1) * std::pow(absValue / 0.3, 2) * 0.3;
+        } else {
+            // 大偏离时使用指数函数，增强响应
+            turn_ratio = (value > 0 ? 1 : -1) * (0.3 + (absValue - 0.3) * 1.5);
+        }
+        
+        // 限制最大转向比例
         turn_ratio = std::clamp(turn_ratio, -1.0, 1.0);
         
         // 基础速度根据曲率动态调整
@@ -80,11 +103,11 @@ namespace Tracking {
         double rightSpeed = adjusted_base;
         
         if (turn_ratio > 0) { // 向右转
-          // 向右转时减少右轮速度
-          rightSpeed = adjusted_base * (1.0 - turn_ratio);
+            // 向右转时减少右轮速度
+            rightSpeed = adjusted_base * (1.0 - turn_ratio);
         } else { // 向左转
-          // 向左转时减少左轮速度
-          leftSpeed = adjusted_base * (1.0 + turn_ratio);
+            // 向左转时减少左轮速度
+            leftSpeed = adjusted_base * (1.0 + turn_ratio);
         }
         
         // 确保速度在有效范围内
@@ -98,9 +121,10 @@ namespace Tracking {
         // 应用速度到电机
         carController_->setMotorSpeeds(leftSpeed, rightSpeed);
         carController_->forward(std::chrono::seconds(0));
-
+    
         std::cout << std::fixed << std::setprecision(4);
         std::cout << "Diff MODE   leftSpeed :  " << leftSpeed << " " << " rightSpeed : " << rightSpeed << std::endl;
+        std::cout << "Turn ratio: " << turn_ratio << " for value: " << value << std::endl;
         std::cout << std::defaultfloat;
       }
 
@@ -143,50 +167,53 @@ namespace Tracking {
         double motor_speed = turningSpeed_;
         double abs_value = std::abs(value);
         
-        // 修正值越大，转向力度越大
-        double turning_intensity = std::min(abs_value * 2.0, 1.0);
+        // 只有当偏差超过较高阈值时才反转
+        double turn_threshold = 0.5; // 提高反转阈值
         
         if (value > 0) { // 向右转
-          if (abs_value > 0.3) { // 只有在足够大的修正值时才使用反向转向
-            // 右轮反转
-            carController_->turnRightWithSpeed(std::chrono::seconds(0), motor_speed);
-            std::cout << "Counter Right Turn - Full Speed: " << motor_speed << std::endl;
+          if (abs_value > turn_threshold) { // 只有在足够大的修正值时才使用反向转向
+            // 右轮反转，但速度可控制
+            double reverse_power = std::min(0.8 + (abs_value-turn_threshold)*2, 1.0); // 限制最大反转功率
+            carController_->turnRightWithSpeed(std::chrono::seconds(0), motor_speed * reverse_power);
+            std::cout << "Counter Right Turn - Speed: " << motor_speed * reverse_power << std::endl;
           } else {
             // 小修正使用差速
             applyHigherDiff(value);
           }
         } else { // 向左转
-          if (abs_value > 0.3) { // 只有在足够大的修正值时才使用反向转向
-            // 左轮反转
-            carController_->turnLeftWithSpeed(std::chrono::seconds(0), motor_speed);
-            std::cout << "Counter Left Turn - Full Speed: " << motor_speed << std::endl;
+          if (abs_value > turn_threshold) { // 只有在足够大的修正值时才使用反向转向
+            // 左轮反转，但速度可控制
+            double reverse_power = std::min(0.8 + (abs_value-turn_threshold)*2, 1.0); // 限制最大反转功率
+            carController_->turnLeftWithSpeed(std::chrono::seconds(0), motor_speed * reverse_power);
+            std::cout << "Counter Left Turn - Speed: " << motor_speed * reverse_power << std::endl;
           } else {
             // 小修正使用差速
             applyHigherDiff(value);
           }
         }
-        
-        // std::cout << std::fixed << std::setprecision(4);
-        // std::cout << "Counter - Left: " << leftSpeed << ", Right: " << rightSpeed << std::endl;
-        // std::cout << std::defaultfloat;
       }
 
       void applyDynamic(const double value, double position) {
         double absValue = std::abs(value);
         
-         // 急弯检测 - 根据修正值和曲率选择策略
-         if (absValue > 0.6 || curvature_ > 0.15) {
-          // 明显偏离 - 使用反向转向以快速修正
-          std::cout << "Dynamic - Using Counter Steering for sharp turn" << std::endl;
-          applyCounter(value);
-        } else if (absValue > 0.3 || curvature_ > 0.05) {
-          // 中等偏离 - 旋转差速提供强力转向
-          std::cout << "Dynamic - Using Rotational Differential for medium turn" << std::endl;
-          applyHigherDiff(value);
+        // 更保守的阈值选择
+        if (absValue < 0.3) {
+            // 几乎不偏离 - 普通差速，但减弱响应
+            std::cout << "Dynamic - Using Light Differential for minor deviation" << std::endl;
+            double dampedValue = value * 0.7;
+            applyDiff(dampedValue);
+        } else if (absValue < 0.55) { // 扩大差速区间
+            // 轻微到中等偏离 - 普通差速
+            std::cout << "Dynamic - Using Differential for moderate deviation" << std::endl;
+            applyDiff(value);
+        } else if (absValue < 0.75 || curvature_ < 0.2) { // 扩大旋转差速区间
+            // 中等偏离 - 旋转差速提供强力转向
+            std::cout << "Dynamic - Using Rotational Differential for strong turn" << std::endl;
+            applyHigherDiff(value);
         } else {
-          // 轻微偏离 - 普通差速足够
-          std::cout << "Dynamic - Using Differential for slight value" << std::endl;
-          applyDiff(value);
+            // 只有明显偏离时才使用反向转向
+            std::cout << "Dynamic - Using Counter Steering for sharp turn" << std::endl;
+            applyCounter(value);
         }
       }
     

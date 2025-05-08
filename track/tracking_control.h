@@ -12,6 +12,8 @@
 #include "line_sensor.h"
 #include "pid_control.h"
 
+bool Break = false;
+
 namespace Tracking {
   class ITrackingControl {
     public:
@@ -39,6 +41,10 @@ namespace Tracking {
         double value = 0;
 
         for (int i = 0; i < sensorNum; ++i) {
+          if (Break) {
+            if (i == 1 || i == 6) continue;
+          }
+          
           if (state[i]->isOnLine()) {
             ++onLineNum;
             double weight = 2.0 * i / (sensorNum - 1) - 1.0;

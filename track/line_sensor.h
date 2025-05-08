@@ -40,10 +40,11 @@ namespace Tracking {
     private:
       std::string name_;
       MotorControl::GPIOPin pin_;
+      bool invert_;
 
     public:
-      DigitalSensor(std::string name, MotorControl::PinId pinId) : name_(name), 
-      pin_(pinId, MotorControl::PinType::GPIO, MotorControl::GPIOType::INPUT, name) {
+      DigitalSensor(std::string name, MotorControl::PinId pinId, bool invert = false) : name_(name), 
+      pin_(pinId, MotorControl::PinType::GPIO, MotorControl::GPIOType::INPUT, name), invert_(invert) {
       }
 
       std::shared_ptr <ISensorState> getNowState() override {
