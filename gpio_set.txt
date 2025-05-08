@@ -1,0 +1,14 @@
+duo-pinmux -w GP0/GP0
+duo-pinmux -w GP1/GP1
+duo-pinmux -w GP2/PWM_10
+duo-pinmux -w GP6/GP6
+duo-pinmux -w GP7/GP7
+duo-pinmux -w GP9/PWM_4
+duo-pinmux -w GP26/GP26
+duo-pinmux -w GP22/GP22
+duo-pinmux -w GP21/GP21
+duo-pinmux -w GP20/GP20
+duo-pinmux -w GP19/GP19
+duo-pinmux -w GP18/GP18
+duo-pinmux -w GP17/GP17
+duo-pinmux -w GP16/GP16
