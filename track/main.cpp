@@ -19,13 +19,13 @@ int main() {
       std::cout << "input speed  base and turn" << std::endl;
       // std::cin >> sp;
 
-      double base = 1, turn = 3;
+      double base = 2, turn = 2;
       std::cin >> base >> turn;
 
-      int _Break = 0;
-      std::cout << "Break ?" << std::endl;
-      std::cin >> _Break;
-      Break = _Break > 0;
+      int _Broken = 0;
+      std::cout << "Broken ?" << std::endl;
+      std::cin >> _Broken;
+      Broken = _Broken > 0;
 
       auto leftMotor = std::make_shared <MotorControl::DCMotor> (0, 1, pwmIdLeft, "leftMotor");
       auto rightMotor = std::make_shared <MotorControl::DCMotor> (6, 7, pwmIdRight, "rightMotor");
@@ -60,7 +60,7 @@ int main() {
 
       for (int t = 1; t <= testCase; ++t) {
         trackingCar->update();
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
       }
 
       trackingCar->end();

@@ -12,7 +12,7 @@
 #include "line_sensor.h"
 #include "pid_control.h"
 
-bool Break = false;
+bool Broken = false;
 
 namespace Tracking {
   class ITrackingControl {
@@ -41,7 +41,7 @@ namespace Tracking {
         double value = 0;
 
         for (int i = 0; i < sensorNum; ++i) {
-          if (Break) {
+          if (Broken) {
             if (i == 1 || i == 6) continue;
           }
           
